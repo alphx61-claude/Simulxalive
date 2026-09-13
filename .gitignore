@@ -5,3 +5,6 @@ simulxalive-atlas.html
 node_modules/
 __pycache__/
 .DS_Store
+
+# Generated roadmap page (rebuild: python3 tools/gen_roadmap.py)
+dist/
