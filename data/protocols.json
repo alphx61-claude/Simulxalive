@@ -1,0 +1,82 @@
+{
+  "$comment": "Paired runs: the same protocol administered to humans and to language models, where BOTH sides report a number on a comparable scale. Qualitative comparisons live in axes.json instead - a row only appears here if it can be plotted honestly.",
+  "protocols": [
+    {
+      "id": "turing-3party",
+      "name": "Three-party Turing test",
+      "instrument": "5-minute simultaneous chat with one human and one system; interrogator picks the human. Preregistered.",
+      "metric": "judged to be the human",
+      "unit": "%",
+      "human": 27, "ai": 73,
+      "ai_label": "GPT-4.5, persona prompt",
+      "note": "Forced choice, so the pair sums to 100. Without the persona prompt the same model falls to 38%.",
+      "source": "jones2026turing"
+    },
+    {
+      "id": "turing-2player",
+      "name": "Two-player Turing test",
+      "instrument": "5-minute conversation with a single partner; judged human or not. Independent pass rates.",
+      "metric": "judged to be human",
+      "unit": "%",
+      "human": 67, "ai": 54,
+      "ai_label": "GPT-4",
+      "note": "ELIZA scored 22% and GPT-3.5 50% in the same study.",
+      "source": "jones2024turing"
+    },
+    {
+      "id": "turing-2player-undergrad",
+      "name": "Two-player test, second population",
+      "instrument": "Same protocol and prompt, undergraduate interrogators.",
+      "metric": "judged to be human",
+      "unit": "%",
+      "human": 71, "ai": 77,
+      "ai_label": "GPT-4o",
+      "note": "The replication that flips the result: the model passes more often than the people it is compared against.",
+      "source": "jones2024turing"
+    },
+    {
+      "id": "false-belief",
+      "name": "False-belief task battery",
+      "instrument": "40 bespoke tasks, each requiring all 8 scenarios correct, with true-belief controls.",
+      "metric": "tasks solved",
+      "unit": "%",
+      "human": 100, "ai": 75,
+      "ai_label": "GPT-4",
+      "note": "Human bar is the adult ceiling; GPT-4's 75% matches published performance of 6-year-old children.",
+      "source": "kosinski2024"
+    },
+    {
+      "id": "scenario-replication",
+      "name": "Published experiments re-run",
+      "instrument": "156 scenario-based experiments from top social science journals, three frontier models.",
+      "metric": "main effects reproduced",
+      "unit": "%",
+      "human": 100, "ai": 77,
+      "ai_label": "frontier models, 73-81% range",
+      "note": "Interaction effects reproduce at only 46-63%, and effect sizes come out consistently larger than the human studies.",
+      "source": "cui2025"
+    },
+    {
+      "id": "many-labs-2",
+      "name": "Many Labs 2 replication",
+      "instrument": "14 studies from the Many Labs 2 project, preregistered analysis.",
+      "metric": "results replicated",
+      "unit": "%",
+      "human": 100, "ai": 37.5,
+      "ai_label": "GPT-3.5",
+      "note": "Six of the fourteen could not be analysed at all: repeated runs returned the same answer with near-zero variance.",
+      "source": "park2024"
+    },
+    {
+      "id": "moral-scenario-agreement",
+      "name": "Moral ratings vs a human sample",
+      "instrument": "60 scenarios rated for morality against N = 940 humans, preregistered.",
+      "metric": "scenarios matching the human mean",
+      "unit": "%",
+      "human": 100, "ai": 13,
+      "ai_label": "GPT-4o / davinci-003",
+      "note": "Correlation with human means approaches r = 1.00 while the model still differs significantly on roughly 87% of individual scenarios. Correlation is not agreement.",
+      "source": "grizzard2025"
+    }
+  ]
+}

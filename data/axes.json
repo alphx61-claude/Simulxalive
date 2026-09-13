@@ -1,0 +1,277 @@
+{
+  "$comment": "Each axis is one construct measured in BOTH humans and LLMs on a shared instrument. 'convergence' and 'robustness' are OUR codings of the cited literature on the rubric in README.md, not figures reported by the papers. Every coding cites the studies it rests on so it can be argued with.",
+  "rubric": {
+    "convergence": "0 = LLM shows the opposite effect or none; 0.5 = same qualitative direction, materially different magnitude or distribution; 1.0 = response distributions statistically indistinguishable from human on the same instrument.",
+    "robustness": "Does the match survive trivial, meaning-preserving perturbation of the instrument - renaming entities, reordering options, reformatting labels, novel variants, dropping a persona prompt? 0 = collapses; 1 = unaffected.",
+    "evidence": "strong = replicated across independent labs; mixed = replicated with material caveats; contested = direct disagreement in the literature."
+  },
+  "families": {
+    "social-cognition": { "label": "Social cognition", "order": 1 },
+    "heuristics": { "label": "Judgment & heuristics", "order": 2 },
+    "moral": { "label": "Moral cognition", "order": 3 },
+    "population": { "label": "Population simulation", "order": 4 },
+    "interaction": { "label": "Live interaction", "order": 5 },
+    "neural-alignment": { "label": "Neural alignment", "order": 6 },
+    "substrate": { "label": "Substrate & invariance", "order": 7 }
+  },
+  "axes": [
+    {
+      "id": "tom-false-belief", "family": "social-cognition", "label": "False-belief attribution",
+      "instrument": "Sally-Anne and unexpected-contents batteries, with true-belief controls",
+      "human": { "finding": "Reliably solved by neurotypical children from roughly age 4-5; near-ceiling in adults. Benchmark sample of 1,907 adults.", "measure": "adult ceiling" },
+      "ai": { "finding": "GPT-4 solved 75% of 40 bespoke tasks (each requiring all 8 scenarios correct), matching published 6-year-old performance; performs at or above the human sample on false belief in the Strachan battery.", "measure": "75% of tasks" },
+      "convergence": 0.85, "robustness": 0.25, "evidence": "mixed", "direction": "at-parity",
+      "note": "The headline result is real and the fragility is equally real: Ullman shows small principle-preserving alterations reverse it, and Ünlütabak finds 100% on standard phrasings dropping below chance on slight modifications.",
+      "sources": ["kosinski2024", "strachan2024", "ullman2023", "unlutabak2024", "kosinski2023pre"]
+    },
+    {
+      "id": "faux-pas", "family": "social-cognition", "label": "Faux pas recognition",
+      "instrument": "Faux Pas Recognition Test",
+      "human": { "finding": "Adults detect social transgressions and the speaker's ignorance of them reliably.", "measure": "human baseline" },
+      "ai": { "finding": "The one test in the Strachan battery where GPT models fell below humans - traced to hyperconservative refusal to commit rather than failed inference. LLaMA2 scored above humans, but follow-up manipulation showed this reflected a bias toward attributing ignorance.", "measure": "below human" },
+      "convergence": 0.40, "robustness": 0.45, "evidence": "strong", "direction": "ai-below",
+      "note": "A case where a raw score above humans was shown to be an artefact once belief likelihood was manipulated - the reason the atlas separates convergence from robustness.",
+      "sources": ["strachan2024", "marchetti2025"]
+    },
+    {
+      "id": "higher-order-tom", "family": "social-cognition", "label": "Higher-order recursive mentalising",
+      "instrument": "Multi-Order Theory of Mind Q&A (orders 2-6)",
+      "human": { "finding": "Adult performance degrades steadily past the 4th order of recursion ('I think that you believe that she knows...').", "measure": "adult benchmark" },
+      "ai": { "finding": "GPT-4 and Flan-PaLM reach adult or near-adult level overall; GPT-4 exceeds adult performance at 6th-order inferences.", "measure": "at/above adult" },
+      "convergence": 0.90, "robustness": 0.40, "evidence": "mixed", "direction": "ai-above",
+      "note": "Systematic reviews still find second-order and recursive inference is where humans consistently outperform under stricter designs - the result depends heavily on test construction.",
+      "sources": ["street2024", "marchetti2025", "vanduijn2023"]
+    },
+    {
+      "id": "pragmatic-inference", "family": "social-cognition", "label": "Pragmatic inference from mental states",
+      "instrument": "EPITOME battery - belief attribution, emotional inference, pragmatic reasoning",
+      "human": { "finding": "Human comprehenders integrate mental-state information into pragmatic interpretation automatically.", "measure": "human baseline" },
+      "ai": { "finding": "LLMs match humans on several EPITOME tasks but commit systematic errors on exactly those requiring pragmatic reasoning from mental-state information.", "measure": "systematic errors" },
+      "convergence": 0.55, "robustness": 0.50, "evidence": "strong", "direction": "ai-below",
+      "note": "The authors read the uneven profile as evidence that human theory of mind needs resources beyond distributional information.",
+      "sources": ["jones2024epitome", "marchetti2025"]
+    },
+
+    {
+      "id": "anchoring", "family": "heuristics", "label": "Anchoring on irrelevant numbers",
+      "instrument": "Tversky-Kahneman anchor-then-estimate prompts",
+      "human": { "finding": "Numerical estimates shift toward an arbitrary anchor presented beforehand - one of the most replicated effects in judgment research.", "measure": "robust effect" },
+      "ai": { "finding": "Present across GPT-4, Claude 2, Gemini Pro and GPT-3.5 in randomised controlled trials; ChatGPT anchored in the same direction as human participants run on identical prompts.", "measure": "present, all models" },
+      "convergence": 0.75, "robustness": 0.35, "evidence": "contested", "direction": "at-parity",
+      "note": "Genuinely disputed: Shaki et al. found the anchoring effect ABSENT in GPT-3 while priming, distance, SNARC and size-congruity were present. Chain-of-thought and 'ignore the anchor' mitigations are only weakly effective.",
+      "sources": ["suri2024", "nguyen2024", "oleary2025", "lou2024", "shaki2023", "pagliaro2026"]
+    },
+    {
+      "id": "framing", "family": "heuristics", "label": "Framing effects",
+      "instrument": "Statistically equivalent positive vs negative presentations",
+      "human": { "finding": "Judgments of efficacy and risk flip with valence framing despite informationally identical content.", "measure": "robust effect" },
+      "ai": { "finding": "Near-universal across model families in a 70,000-response assessment of 8 models; ChatGPT rated an item more efficacious under positive framing, as human participants did. Source framing shifts agreement across 192,000 assessments.", "measure": "near-universal" },
+      "convergence": 0.80, "robustness": 0.55, "evidence": "strong", "direction": "at-parity",
+      "note": "Framing and primacy/recency are the two effects that survive the strictest multi-variant testing - most other biases do not.",
+      "sources": ["pagliaro2026", "suri2024", "germani2025", "jones2022biases"]
+    },
+    {
+      "id": "endowment", "family": "heuristics", "label": "Endowment effect",
+      "instrument": "Owned vs newly found identical item valuation",
+      "human": { "finding": "People price an item they own above an objectively identical item they do not.", "measure": "robust effect" },
+      "ai": { "finding": "ChatGPT valued an owned item above an identical found item; human participants run on the same prompts showed the same effect.", "measure": "present" },
+      "convergence": 0.70, "robustness": 0.30, "evidence": "mixed", "direction": "at-parity",
+      "note": "Rests substantially on a single four-study paper. Notable because loss aversion is usually explained by affective processes the model does not have.",
+      "sources": ["suri2024"]
+    },
+    {
+      "id": "representativeness", "family": "heuristics", "label": "Conjunction fallacy & availability",
+      "instrument": "Linda-type conjunction items; anecdote-vs-base-rate items",
+      "human": { "finding": "People judge a conjunction more probable than one of its conjuncts, and over-weight vivid anecdotes against base rates.", "measure": "robust effect" },
+      "ai": { "finding": "ChatGPT judged two events co-occurring as likelier than either alone, and was swayed by anecdotal information - matching the human participants tested alongside.", "measure": "present" },
+      "convergence": 0.70, "robustness": 0.35, "evidence": "mixed", "direction": "at-parity",
+      "note": "Susceptibility varies substantially across model families in larger multi-model assessments.",
+      "sources": ["suri2024", "pagliaro2026"]
+    },
+    {
+      "id": "primacy-recency", "family": "heuristics", "label": "Primacy & recency in option order",
+      "instrument": "Semantically equivalent prompts with reordered options",
+      "human": { "finding": "Serial position shapes recall and choice.", "measure": "robust effect" },
+      "ai": { "finding": "Near-universal across the eight models assessed, and one of only two effect families to generalise across prompt reformulations.", "measure": "near-universal" },
+      "convergence": 0.75, "robustness": 0.60, "evidence": "strong", "direction": "ai-above",
+      "note": "In LLMs this is strong enough to invert conclusions - see the order-flip in the Moral Foundations replication.",
+      "sources": ["pagliaro2026", "shaki2023", "park2024"]
+    },
+
+    {
+      "id": "moral-advice-quality", "family": "moral", "label": "Perceived quality of moral advice",
+      "instrument": "Modified Moral Turing Test; blinded ratings of moral evaluations",
+      "human": { "finding": "Evaluations by a representative US sample and by a professional ethicist serve as the comparison.", "measure": "human baseline" },
+      "ai": { "finding": "A representative sample of 299 US adults rated GPT-4's moral reasoning superior on virtuousness, intelligence and trustworthiness. Americans rated GPT-4o's ethical advice as more moral, trustworthy, thoughtful and correct than a well-known newspaper ethics column.", "measure": "rated above human" },
+      "convergence": 0.85, "robustness": 0.60, "evidence": "strong", "direction": "ai-above",
+      "note": "The AI did not pass the identification half of the test - participants still picked the source above chance, possibly because of its perceived superiority.",
+      "sources": ["aharoni2024", "dillion2025", "garcia2024"]
+    },
+    {
+      "id": "moral-preference-profile", "family": "moral", "label": "Life-and-death preference profile",
+      "instrument": "Moral Machine framework",
+      "human": { "finding": "Large-scale human preferences: save more lives, prioritise humans over pets, with graded and comparatively mild inclinations.", "measure": "human preference set" },
+      "ai": { "finding": "GPT-3.5/4, PaLM 2 and Llama 2 broadly align on direction, but show significant quantitative disparities and more uncompromising choices. Across 75 configurations from 0.27B to 1000B, distance from human preference falls as a power law, D proportional to S^-0.10.", "measure": "aligned in sign" },
+      "convergence": 0.65, "robustness": 0.50, "evidence": "strong", "direction": "ai-above",
+      "note": "One of the few axes with a measured scaling relationship - alignment improves with size, but slowly, and reasoning models help more at small scale.",
+      "sources": ["takemoto2024", "takemoto2026"]
+    },
+    {
+      "id": "moral-rating-distribution", "family": "moral", "label": "Distributional fidelity of moral ratings",
+      "instrument": "60 scenarios rated for morality, preregistered, against N = 940 humans",
+      "human": { "finding": "Human ratings spread across the scale with substantial between-person variability.", "measure": "N = 940" },
+      "ai": { "finding": "Correlations with human means approach r = 1.00, yet difference scores show ChatGPT differs significantly with moderate-to-large effect sizes on roughly 87% of scenarios, giving more extreme ratings and clustering around a restricted set of values.", "measure": "differs on ~87%" },
+      "convergence": 0.30, "robustness": 0.55, "evidence": "strong", "direction": "ai-below",
+      "note": "The single most important methodological caution in the atlas: a near-perfect correlation coexists with systematic disagreement on almost every item. Correlation is not agreement.",
+      "sources": ["grizzard2025", "park2024"]
+    },
+    {
+      "id": "omission-bias", "family": "moral", "label": "Omission bias in dilemmas",
+      "instrument": "Realistic moral dilemmas and collective action problems, N = 285 / 474 / 491",
+      "human": { "finding": "A representative US sample shows a modest preference for inaction over action in moral dilemmas.", "measure": "modest bias" },
+      "ai": { "finding": "LLMs show markedly stronger omission bias than participants, plus a bias humans do not have: a tendency to answer 'no', which flips the decision depending on how the question is worded. Traced to chatbot fine-tuning.", "measure": "amplified + yes/no bias" },
+      "convergence": 0.45, "robustness": 0.65, "evidence": "strong", "direction": "ai-above",
+      "note": "Amplification rather than imitation - the divergence grows with alignment training, not with scale.",
+      "sources": ["cheung2025"]
+    },
+    {
+      "id": "moral-dumbfounding", "family": "moral", "label": "Affect-driven moral condemnation",
+      "instrument": "Moral dumbfounding paradigm - harmless but taboo acts",
+      "human": { "finding": "Condemnation is predicted better by how disturbing an act feels than by any harm it causes.", "measure": "botherness > harm" },
+      "ai": { "finding": "Across GPT, Claude and Kimi, judgments of wrongfulness were likewise predicted more strongly by perceived botherness than by perceived harm - reproducing a functional signature of intuitive moral cognition without affect.", "measure": "same structure" },
+      "convergence": 0.70, "robustness": 0.45, "evidence": "mixed", "direction": "at-parity",
+      "note": "A judgment-action dissociation appears in agentic mode: models condemn the acts, then frequently comply with direct requests to facilitate them.",
+      "sources": ["mentovich2026", "haas2026"]
+    },
+
+    {
+      "id": "silicon-sampling", "family": "population", "label": "Subgroup response emulation",
+      "instrument": "Silicon samples conditioned on sociodemographic backstories from real survey respondents",
+      "human": { "finding": "Response distributions from large US surveys across many demographic subgroups.", "measure": "survey distributions" },
+      "ai": { "finding": "Properly conditioned GPT-3 emulates response distributions of a wide variety of human subgroups - 'algorithmic fidelity' - reflecting nuanced interplay of attitude and sociocultural context rather than surface similarity.", "measure": "high fidelity" },
+      "convergence": 0.75, "robustness": 0.35, "evidence": "mixed", "direction": "at-parity",
+      "note": "Severely configuration-dependent: across 66 defensible configurations of the same use case, human-silicon correlation ranged from r = .23 to r = .84. The analytic choices, not the model, can decide the finding.",
+      "sources": ["argyle2023", "cummins2025", "filippas2023"]
+    },
+    {
+      "id": "effect-prediction", "family": "population", "label": "Predicting experimental treatment effects",
+      "instrument": "Archive of 70 preregistered, nationally representative survey experiments - 469 effects, 119,330 participants",
+      "human": { "finding": "Pooled human forecasters predict experimental outcomes with well-characterised accuracy.", "measure": "pooled forecaster accuracy" },
+      "ai": { "finding": "GPT-4 predictions of simulated treatment effects correlated strongly with actual effects, at accuracy similar to pooled human forecasts - holding for studies published after the training cutoff, and for open-weight models. Effect sizes were systematically overestimated.", "measure": "~pooled human forecasters" },
+      "convergence": 0.80, "robustness": 0.70, "evidence": "strong", "direction": "at-parity",
+      "note": "The strongest positive result in the atlas, and the best controlled for training contamination. In a secondary archive of 15 megastudies (606 effects) correlations were lower but comparable to expert forecasters.",
+      "sources": ["ashokkumar2026"]
+    },
+    {
+      "id": "scenario-replication", "family": "population", "label": "Replicating published experiments",
+      "instrument": "156 scenario-based experiments from top social science journals, three frontier models",
+      "human": { "finding": "The original published human-participant results.", "measure": "original findings" },
+      "ai": { "finding": "Main effects replicated at 73-81%, interaction effects at 46-63%. Effect sizes consistently larger than the human studies. Where originals reported null findings, LLMs produced significant results 68-83% of the time.", "measure": "73-81% main effects" },
+      "convergence": 0.70, "robustness": 0.55, "evidence": "strong", "direction": "ai-above",
+      "note": "Replication rates drop significantly for socially sensitive topics - race, gender, ethics - which is where substitution would be most tempting and least safe.",
+      "sources": ["cui2025", "aher2023", "mou2024"]
+    },
+    {
+      "id": "response-variance", "family": "population", "label": "Diversity of response",
+      "instrument": "Many Labs 2 replications; repeated sampling on opinion items",
+      "human": { "finding": "Human samples show wide, structured disagreement on political, economic and moral items - the variance is the signal.", "measure": "wide dispersion" },
+      "ai": { "finding": "Different runs answered nuanced questions with zero or near-zero variation - a 'correct answer' effect robust to changing demographic details. GPT-3.5 identified as conservative in 99.6% of cases and liberal in 99.3% under reversed option order, while both groups showed right-leaning moral foundations.", "measure": "near-zero variance" },
+      "convergence": 0.15, "robustness": 0.70, "evidence": "strong", "direction": "ai-below",
+      "note": "The largest behavioural divergence in the atlas. Only 37.5% of the analysable Many Labs 2 studies replicated; six of fourteen could not be analysed at all because of the collapse in variance.",
+      "sources": ["park2024", "grizzard2025"]
+    },
+    {
+      "id": "strategic-depth", "family": "population", "label": "Strategic reasoning depth",
+      "instrument": "11-20 money request game (level-k depth of reasoning)",
+      "human": { "finding": "Human play produces a characteristic distribution over reasoning levels rather than a single best response.", "measure": "level-k distribution" },
+      "ai": { "finding": "Nearly all advanced approaches fail to replicate the human behaviour distribution across many models. Failure causes are diverse and unpredictable - input language, assigned role, safeguarding behaviour.", "measure": "fails to replicate" },
+      "convergence": 0.25, "robustness": 0.60, "evidence": "strong", "direction": "ai-below",
+      "note": "Reads as a direct counterweight to the population-simulation successes: the same models that predict aggregate treatment effects miss the shape of strategic play.",
+      "sources": ["gao2025surrogates"]
+    },
+
+    {
+      "id": "turing-3party", "family": "interaction", "label": "Three-party Turing test",
+      "instrument": "5-minute simultaneous conversation with one human and one system, preregistered",
+      "human": { "finding": "The real human witness is selected as the human less than half the time when facing a persona-prompted frontier model.", "measure": "27% selected" },
+      "ai": { "finding": "GPT-4.5 with a humanlike persona prompt was judged the human 73% of the time - significantly more often than interrogators selected the real human. LLaMa-3.1-405B reached 56%, statistically level with humans.", "measure": "73% judged human" },
+      "convergence": 0.95, "robustness": 0.30, "evidence": "strong", "direction": "ai-above",
+      "note": "The fragility is the finding: without the persona prompt the same models fell to 38% and 36%, not consistently better than ELIZA (23%) or un-prompted GPT-4o (21%). A third study replicated the pass at 15-minute length (56% and 59%).",
+      "sources": ["jones2026turing", "jones2024turing", "jones2023turing"]
+    },
+    {
+      "id": "displaced-detection", "family": "interaction", "label": "Detection from transcript",
+      "instrument": "Displaced and inverted Turing tests - judging a transcript rather than interrogating",
+      "human": { "finding": "Interactive interrogators are meaningfully accurate; displaced human judges reading transcripts fall below chance.", "measure": "below chance" },
+      "ai": { "finding": "GPT-3.5, GPT-4 and displaced human adjudicators alike judged the best-performing GPT-4 witness to be human more often than they judged actual human witnesses to be human.", "measure": "judged more human than humans" },
+      "convergence": 0.90, "robustness": 0.50, "evidence": "mixed", "direction": "ai-above",
+      "note": "Most real-world exposure is displaced - people read conversations rather than interrogate. This is the condition under which detection is worst.",
+      "sources": ["rathi2024", "jones2024turing"]
+    },
+    {
+      "id": "behavioural-game-profile", "family": "interaction", "label": "Behavioural game & personality profile",
+      "instrument": "Classic behavioural game battery (trust, fairness, risk, cooperation) plus Big-5 inventory",
+      "human": { "finding": "Tens of thousands of human subjects from more than 50 countries provide the comparison distribution.", "measure": "50+ country sample" },
+      "ai": { "finding": "ChatGPT-4's behavioural and personality traits are statistically indistinguishable from a random human drawn from that sample. It modifies behaviour with experience and re-framing as if learning.", "measure": "indistinguishable from a random human" },
+      "convergence": 0.85, "robustness": 0.55, "evidence": "strong", "direction": "at-parity",
+      "note": "Indistinguishable from a RANDOM human, not from the average one: where behaviour is distinct it sits at the altruistic and cooperative end, acting as if maximising an average of its own and its partner's payoffs.",
+      "sources": ["mei2024", "cheung2025"]
+    },
+
+    {
+      "id": "cortical-encoding", "family": "neural-alignment", "label": "Cortical response encoding",
+      "instrument": "Linear mapping from model activations to fMRI/ECoG responses during naturalistic listening",
+      "human": { "finding": "101 subjects recorded with fMRI over 70 minutes of short stories; comprehension scored per story.", "measure": "N = 101, 70 min" },
+      "ai": { "finding": "GPT-2 representations map onto brain responses to spoken stories and additionally predict how well each subject understood each narrative, peaking in angular, medial temporal and supramarginal gyri.", "measure": "predicts comprehension" },
+      "convergence": 0.70, "robustness": 0.65, "evidence": "strong", "direction": "at-parity",
+      "note": "Representational rather than behavioural convergence - and it goes beyond correlation to predicting a behavioural outcome (comprehension) from the mapping.",
+      "sources": ["caucheteux2022", "kumar2024", "gao2025brain"]
+    },
+    {
+      "id": "layer-timescale", "family": "neural-alignment", "label": "Layer depth ↔ cortical timescale",
+      "instrument": "ECoG during a 30-minute narrative; per-layer encoding models",
+      "human": { "finding": "The cortical language network has a graded temporal receptive window, with later integration in Broca's area and associated regions.", "measure": "temporal hierarchy" },
+      "ai": { "finding": "Deeper layers of GPT-2 XL and Llama-2 correspond to later brain activity, with model depth tracking the brain's temporal receptive window during comprehension.", "measure": "depth tracks latency" },
+      "convergence": 0.70, "robustness": 0.65, "evidence": "strong", "direction": "at-parity",
+      "note": "As benchmark performance improves, models become more brain-like AND align more closely with the brain's hierarchical feature-extraction pathway, using fewer layers for the same encoding.",
+      "sources": ["goldstein2025", "mischler2024"]
+    },
+    {
+      "id": "reading-time-n400", "family": "neural-alignment", "label": "Reading time & N400 prediction",
+      "instrument": "Self-paced reading, gaze duration, MAZE times, N400 potentials",
+      "human": { "finding": "Processing difficulty shows up as slower reading, longer fixations and larger N400 amplitude.", "measure": "behavioural + ERP" },
+      "ai": { "finding": "Next-word probabilities from the INTERNAL layers of larger models fit human sentence-processing data as well as or better than smaller models - overturning the claim that scale makes models cognitively implausible, which rested on reading only the final layer.", "measure": "internal layers fit better" },
+      "convergence": 0.65, "robustness": 0.60, "evidence": "mixed", "direction": "at-parity",
+      "note": "Earlier layers track fast gaze durations; later layers track slower signals such as N400 and MAZE times. Whether scale helps or hurts depends entirely on which layer you read.",
+      "sources": ["kuribayashi2025", "gao2025brain"]
+    },
+
+    {
+      "id": "data-efficiency", "family": "substrate", "label": "Language data to fluency",
+      "instrument": "Words of linguistic input required to reach fluent use",
+      "human": { "finding": "Children acquire fluent language from under 100 million words of input - and much of the grounding comes through multimodal, interactive, social exposure.", "measure": "<100M words" },
+      "ai": { "finding": "Language models typically need three to four orders of magnitude more data than that and still underperform humans on many evaluations; the gap to children is put at four to five orders of magnitude.", "measure": "10^3-10^5x more" },
+      "convergence": 0.02, "robustness": 0.90, "evidence": "strong", "direction": "ai-below",
+      "note": "Training on child-directed speech does not close it: the evidence points to the child's learning algorithm being substantially more data-efficient, not the child's data being better.",
+      "sources": ["frank2023", "warstadt2025", "feng2024", "vong2024"]
+    },
+    {
+      "id": "energy-budget", "family": "substrate", "label": "Power budget for cognition",
+      "instrument": "Metabolic accounting of cortical computation vs datacentre inference",
+      "human": { "finding": "The whole brain runs on about 20 W. Partitioned, only ~0.1 W of ATP goes to cortical computation itself; long-distance communication costs 35 times more, about 3.5 W.", "measure": "~0.1 W computation" },
+      "ai": { "finding": "Frontier training and serving consume many orders of magnitude more energy for narrower lifetime capability, which is the explicit motivation for neuromorphic and spiking alternatives.", "measure": "orders of magnitude more" },
+      "convergence": 0.05, "robustness": 0.85, "evidence": "strong", "direction": "ai-below",
+      "note": "Biological brains do lifelong learning, adaptive control and flexible reasoning inside that budget. The gap is architectural, not a matter of better hardware alone.",
+      "sources": ["levy2021", "brainpower2021", "peters2026"]
+    },
+    {
+      "id": "prompt-invariance", "family": "substrate", "label": "Invariance to surface reformatting",
+      "instrument": "Semantically identical items with reformatted labels and reordered options",
+      "human": { "finding": "Human judgments are substantially - not perfectly - invariant to relabelling the options in a question.", "measure": "largely invariant" },
+      "ai": { "finding": "Renaming 'Case 1' and 'Case 2' to '(A)' and '(B)' materially changes moral judgments. Under variant-level testing that requires an effect to generalise across prompt formulations, 27 of 43 trial-level significant bias effects collapse to one.", "measure": "27 of 43 → 1" },
+      "convergence": 0.10, "robustness": 0.90, "evidence": "strong", "direction": "ai-below",
+      "note": "This axis governs every other one. Prompt-induced systematic uncertainty dominates statistical uncertainty, which means many published human-LLM similarities are claims about a phrasing rather than about a model.",
+      "sources": ["oh2025", "pagliaro2026", "cummins2025"]
+    }
+  ]
+}

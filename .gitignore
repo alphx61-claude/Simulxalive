@@ -1,0 +1,7 @@
+# Seeded design canvas: ~2 MB of editor payload, regenerated from the
+# .dc.html artboards + canvas.json via tools/seed.sh
+simulxalive-atlas.html
+
+node_modules/
+__pycache__/
+.DS_Store
