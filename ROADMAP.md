@@ -4,7 +4,7 @@
 
 Show how the gap between human and machine cognition has moved over time, as a graph of the research itself.
 
-**4 of 32 milestones complete.**
+**5 of 32 milestones complete.**
 
 ## Decisions taken
 
@@ -36,12 +36,12 @@ The graph renders from real papers with real dates, so a time axis becomes possi
 
 **Done when:** Every source is a node with a year, and the validator passes clean.
 
-### 2. Ingestion pipeline — _planned_  (0/5)
+### 2. Ingestion pipeline — _planned_  (1/5)
 
 Grow the corpus without hand-typing every record, and without letting quality slip.
 
 - [ ] OpenAlex adapter for metadata, citations and reference edges
-- [ ] Discovery queries per axis, deduplicated against the existing corpus
+- [x] Discovery queries per axis, deduplicated against the existing corpus
 - [ ] Review CLI: accept, reject, tag an axis, mark major, assign a cluster
 - [ ] Cluster proposals from the citation graph, confirmed by hand
 - [ ] Provenance on every record: how it entered and who accepted it

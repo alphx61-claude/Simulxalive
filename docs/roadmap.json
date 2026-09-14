@@ -36,7 +36,7 @@
       "goal": "Grow the corpus without hand-typing every record, and without letting quality slip.",
       "milestones": [
         { "t": "OpenAlex adapter for metadata, citations and reference edges", "done": false },
-        { "t": "Discovery queries per axis, deduplicated against the existing corpus", "done": false },
+        { "t": "Discovery queries per axis, deduplicated against the existing corpus", "done": true },
         { "t": "Review CLI: accept, reject, tag an axis, mark major, assign a cluster", "done": false },
         { "t": "Cluster proposals from the citation graph, confirmed by hand", "done": false },
         { "t": "Provenance on every record: how it entered and who accepted it", "done": false }

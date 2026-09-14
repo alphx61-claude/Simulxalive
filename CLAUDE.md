@@ -34,7 +34,11 @@ These are not style preferences. Breaking them makes the project worthless.
 | `docs/roadmap.json` | phases and milestones — **the state of the project** |
 | `docs/DATA-MODEL.md` | v2 schema: papers and clusters as nodes |
 | `docs/DESIGN.md` | the visual system |
+| `docs/BACKEND.md` | the ingestion backend: protocol, record shape, staging |
+| `server/` | WebSocket backend that pulls papers into `data/ingest/` |
+| `tests/` | `python3 -m unittest discover -s tests -t .` — no network |
 | `tools/gen_artboards.py` | redraws the design plates from `data/` |
+| `tools/pull_papers.py` | terminal client for the backend |
 | `tools/gen_roadmap.py` | renders `ROADMAP.md` and the tracking page |
 | `*.dc.html`, `canvas.json` | design canvas artboards |
 
@@ -54,5 +58,6 @@ These are not style preferences. Breaking them makes the project worthless.
 ## Status
 
 Phase 0 complete: taxonomy, seed bibliography, paired protocols, design system and a
-six-plate layout. Phase 1 (papers as graph nodes) is next. No application code exists
-yet — this is deliberate, not an oversight.
+six-plate layout. Phase 1 (papers as graph nodes) is next; the phase-2 ingestion
+backend exists ahead of it under `server/`. Nothing it pulls reaches `data/` without
+a human accepting it — see `docs/BACKEND.md`. There is still no atlas application.

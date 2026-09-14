@@ -8,3 +8,7 @@ __pycache__/
 
 # Generated roadmap page (rebuild: python3 tools/gen_roadmap.py)
 dist/
+
+# Pulled candidates awaiting review. Machine output, not corpus data: what
+# survives review is promoted into data/ by hand (see docs/BACKEND.md).
+data/ingest/

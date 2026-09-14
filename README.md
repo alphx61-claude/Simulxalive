@@ -50,6 +50,21 @@ disputed (`contested`); it weights every aggregate above.
 
 Figures quoted inside `finding` and `note` fields **are** from the papers.
 
+## Pulling papers
+
+The corpus grows through a WebSocket backend that searches bibliographic APIs per
+axis, drops what we already have, and streams the rest as candidates for review:
+
+```bash
+python3 -m server --contact you@example.org            # ws://127.0.0.1:8787/ws
+python3 tools/pull_papers.py --axis tom-false-belief --side machine --limit 20
+```
+
+Nothing it pulls enters the corpus on its own. Candidates land in `data/ingest/`
+with `review.status: pending`, their citation counts carrying the date and the
+upstream field they came from, and every judgement the rubric calls for left null
+for a person to make. Protocol and record shape: `docs/BACKEND.md`.
+
 ## Design canvas
 
 The visual design lives as artboards in the repository root (`*.dc.html`) plus
@@ -67,4 +82,5 @@ Visual system: **Dala** — see `docs/DESIGN.md`.
 
 ## Status
 
-Design canvas only. The interactive build is not started.
+Design canvas, plus the ingestion backend (roadmap phase 2) that pulls candidate
+papers over a WebSocket. The atlas itself is not started.
