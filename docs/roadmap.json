@@ -35,6 +35,7 @@
       "id": 2, "name": "Ingestion pipeline", "status": "planned",
       "goal": "Grow the corpus without hand-typing every record, and without letting quality slip.",
       "milestones": [
+        { "t": "Submission sockets: one envelope for DOI, arXiv, OpenAlex, Consensus, link and manual entry, routed by pattern, staged behind the review gate, and declared as a manifest the site renders its inputs from", "done": true },
         { "t": "OpenAlex adapter for metadata, citations and reference edges", "done": false },
         { "t": "Discovery queries per axis, deduplicated against the existing corpus", "done": false },
         { "t": "Review CLI: accept, reject, tag an axis, mark major, assign a cluster", "done": false },

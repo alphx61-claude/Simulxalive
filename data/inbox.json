@@ -1,0 +1,98 @@
+{
+  "$comment": "Staging queue for paper submissions. Sockets (tools/sockets, docs/SOCKETS.md) write here; nothing reaches data/sources.json until a person accepts it with tools/ingest.py accept. Drafts are not citations - a pending row may be missing everything but an identifier.",
+  "submissions": [
+    {
+      "key": "consensus:cd3618ac46e15447b9a943510708dc4b",
+      "socket": "consensus",
+      "ident": {
+        "consensus": "cd3618ac46e15447b9a943510708dc4b",
+        "url": "https://consensus.app/papers/details/cd3618ac46e15447b9a943510708dc4b/"
+      },
+      "title": "GSM-Symbolic: Understanding the Limitations of Mathematical Reasoning in Large Language Models",
+      "authors": "Mirzadeh, I. et al.",
+      "year": 2024,
+      "venue": "arXiv",
+      "url": "https://consensus.app/papers/details/cd3618ac46e15447b9a943510708dc4b/",
+      "axes": [
+        "prompt-invariance"
+      ],
+      "domain": "machine",
+      "note": "Symbolic templates over GSM8K: accuracy declines when only the numeric values change, and adding one irrelevant but topical clause drops accuracy by up to 65%. Directly on prompt-invariance; the reported drops are the paper's own.",
+      "status": "pending",
+      "received": "2026-09-14",
+      "submitted_by": "claude-code",
+      "warnings": []
+    },
+    {
+      "key": "consensus:026728bd66de549fb52e39a34fe298ff",
+      "socket": "consensus",
+      "ident": {
+        "consensus": "026728bd66de549fb52e39a34fe298ff",
+        "url": "https://consensus.app/papers/details/026728bd66de549fb52e39a34fe298ff/"
+      },
+      "title": "Alice in Wonderland: Simple Tasks Showing Complete Reasoning Breakdown in State-Of-the-Art Large Language Models",
+      "authors": "Nezhurina, M. et al.",
+      "year": 2024,
+      "venue": "arXiv",
+      "url": "https://consensus.app/papers/details/026728bd66de549fb52e39a34fe298ff/",
+      "axes": [
+        "prompt-invariance"
+      ],
+      "domain": "machine",
+      "note": "Strong performance fluctuations across natural variations of one problem template that change neither structure nor difficulty, with confident confabulated justifications. Same axis, different instrument family.",
+      "status": "pending",
+      "received": "2026-09-14",
+      "submitted_by": "claude-code",
+      "warnings": []
+    },
+    {
+      "key": "consensus:bf639be3825f55fa90dcf3d505814320",
+      "socket": "consensus",
+      "ident": {
+        "consensus": "bf639be3825f55fa90dcf3d505814320",
+        "url": "https://consensus.app/papers/details/bf639be3825f55fa90dcf3d505814320/"
+      },
+      "title": "Language models, like humans, show content effects on reasoning tasks",
+      "authors": "Lampinen, A. K. et al.",
+      "year": 2024,
+      "venue": "PNAS Nexus",
+      "url": "https://consensus.app/papers/details/bf639be3825f55fa90dcf3d505814320/",
+      "axes": [
+        "pragmatic-inference",
+        "prompt-invariance"
+      ],
+      "domain": "bridge",
+      "note": "Humans and models tested on the same three logic tasks; both show content effects, but the Wason selection task splits them - humans do much worse than large models and err differently. A bridge paper: both sides measured in one study.",
+      "status": "pending",
+      "received": "2026-09-14",
+      "submitted_by": "claude-code",
+      "warnings": []
+    },
+    {
+      "key": "arxiv:2410.05229",
+      "socket": "arxiv",
+      "ident": {
+        "arxiv": "2410.05229"
+      },
+      "title": null,
+      "authors": null,
+      "year": null,
+      "venue": null,
+      "url": "https://arxiv.org/abs/2410.05229",
+      "axes": [
+        "prompt-invariance"
+      ],
+      "domain": null,
+      "note": "",
+      "status": "rejected",
+      "received": "2026-09-14",
+      "submitted_by": "claude-code",
+      "warnings": [
+        "Not citable yet - missing title, authors, year, venue. No resolver is installed, so these have to be supplied by hand before this can be accepted."
+      ],
+      "reason": "Same paper as consensus:cd3618ac46e15447b9a943510708dc4b, arriving by a different identifier. With no resolver installed the layer cannot cross-link an arXiv id to a Consensus record, so the review gate catches it instead.",
+      "rejected_by": "claude-code",
+      "rejected": "2026-09-14"
+    }
+  ]
+}

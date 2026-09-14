@@ -31,9 +31,14 @@ These are not style preferences. Breaking them makes the project worthless.
 | `data/axes.json` | 28 constructs, the rubric, convergence/robustness scores |
 | `data/protocols.json` | paired runs where humans and models both report a number |
 | `data/sources.json` | bibliography, referenced by id from the other two |
+| `data/inbox.json` | submissions staged by a socket, waiting on a person |
 | `docs/roadmap.json` | phases and milestones — **the state of the project** |
 | `docs/DATA-MODEL.md` | v2 schema: papers and clusters as nodes |
 | `docs/DESIGN.md` | the visual system |
+| `docs/SOCKETS.md` | the input-socket contract and submission envelope |
+| `tools/sockets/` | one socket per way a paper can arrive; `submit()` is the layer |
+| `tools/ingest.py` | submit a source, review the queue, accept into the bibliography |
+| `tools/validate.py` | referential integrity across axes, protocols, sources, inbox |
 | `tools/gen_artboards.py` | redraws the design plates from `data/` |
 | `tools/gen_roadmap.py` | renders `ROADMAP.md` and the tracking page |
 | `*.dc.html`, `canvas.json` | design canvas artboards |
@@ -45,8 +50,13 @@ These are not style preferences. Breaking them makes the project worthless.
   artboard except `Main.dc.html`, which is authored.
 - The seeded canvas (`simulxalive-atlas.html`, ~2.5 MB) is gitignored and rebuilt by
   `tools/seed.sh`.
-- Validate data before committing: referential integrity between `axes`, `protocols`
-  and `sources` is checked by the validator once Phase 1 lands.
+- New sources enter through a socket — `python3 tools/ingest.py submit "<reference>"` —
+  rather than by hand-editing `data/sources.json`. Submissions stage in `data/inbox.json`
+  and only a person moves them across (`ingest.py accept`), which records provenance and
+  refuses an entry missing a field. `docs/SOCKETS.md` is the contract.
+- Validate before committing anything under `data/`: `python3 tools/validate.py` checks
+  referential integrity between `axes`, `protocols`, `sources` and the inbox. After
+  touching a socket, `python3 tools/test_sockets.py`.
 - Research lookups: the Consensus MCP server returns real papers with resolvable URLs.
   Prefer it over recalling citations from memory — memory produces plausible-looking
   fabrications here.
@@ -54,5 +64,7 @@ These are not style preferences. Breaking them makes the project worthless.
 ## Status
 
 Phase 0 complete: taxonomy, seed bibliography, paired protocols, design system and a
-six-plate layout. Phase 1 (papers as graph nodes) is next. No application code exists
-yet — this is deliberate, not an oversight.
+six-plate layout. Phase 1 (papers as graph nodes) is next. The input-socket layer landed
+early out of Phase 2, because the ingestion seam had to exist before the corpus grows;
+it has no UI and makes no network calls. There is still no application code — deliberate,
+not an oversight.
