@@ -69,11 +69,30 @@ post it.
 `parse_failed`, `field_missing`, `bad_field`, `unknown_axis`, `bad_domain`,
 `duplicate`, `incomplete`, `not_found`, `not_pending`, `id_taken`.
 
+## The page
+
+`site/submit.html` is the input surface. It is **generated** — `python3 tools/gen_site.py`
+inlines the manifest, the extraction patterns and the 28 axis ids into the page, so the
+form cannot drift from the layer behind it. Edit a socket, re-run the generator, commit
+the result; never hand-edit the output.
+
+It is a single file with no build step, no framework and no fetch, so it opens straight
+from disk:
+
+```bash
+python3 tools/gen_site.py          # after touching a socket or the taxonomy
+open site/submit.html              # or: npx http-server site
+```
+
+The page routes a paste through the manifest's patterns, shows which socket claimed it
+and what key it will get, marks which bibliography fields are still owed, and emits the
+envelope. It writes nothing: copy or download the envelope and replay it (below).
+
 ## Rendering the inputs from the registry
 
 Each socket declares its own fields and its own detection patterns, so the form is
-data, not markup. Ship the manifest beside the page — Phase 3 is a static site, so
-there is no backend to ask:
+data, not markup. To ship the manifest beside some other page — Phase 3 is a static
+site, so there is no backend to ask:
 
 ```bash
 python3 tools/ingest.py sockets --out dist/sockets.json
@@ -97,8 +116,8 @@ browser routes a paste exactly as Python does, from the same strings. Highest
 `weight` among matching sockets wins; `manual` never auto-routes.
 
 Since the site is static, a browser submission cannot write `data/inbox.json` itself.
-It builds the envelope above and hands it off — a downloaded `.json`, a prefilled
-issue, a clipboard copy — and the envelope is replayed through the same code:
+`site/submit.html` builds the envelope above and hands it off — a clipboard copy or a
+downloaded `.json` — and the envelope is replayed through the same code:
 
 ```bash
 python3 tools/ingest.py submit --json - < submission.json
@@ -144,6 +163,7 @@ entry in `sniff()` and `key_for()` — that is the whole list. Then run
 ## Commands
 
 ```bash
+python3 tools/gen_site.py                       # rebuild site/submit.html
 python3 tools/ingest.py sockets                 # what inputs exist
 python3 tools/ingest.py submit "<reference>" --axis <id> --domain <d> --by <you>
 python3 tools/ingest.py queue                   # what is waiting on a person

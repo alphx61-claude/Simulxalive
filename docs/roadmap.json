@@ -48,6 +48,7 @@
       "id": 3, "name": "The atlas", "status": "planned",
       "goal": "The thing people actually open.",
       "milestones": [
+        { "t": "Submission page: the socket manifest rendered as a static input surface, no backend and no build step", "done": true },
         { "t": "Static site, no backend: data ships as JSON beside the page", "done": false },
         { "t": "Force graph, two constellations, correspondence and contradiction edges", "done": false },
         { "t": "Time scrubber: drag a year, watch the corpus and the gap move", "done": false },

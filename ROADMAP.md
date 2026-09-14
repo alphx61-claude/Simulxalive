@@ -4,7 +4,7 @@
 
 Show how the gap between human and machine cognition has moved over time, as a graph of the research itself.
 
-**5 of 33 milestones complete.**
+**6 of 34 milestones complete.**
 
 ## Decisions taken
 
@@ -49,10 +49,11 @@ Grow the corpus without hand-typing every record, and without letting quality sl
 
 **Done when:** 300-500 papers in the corpus, resolving to roughly 60-80 visible nodes.
 
-### 3. The atlas — _planned_  (0/6)
+### 3. The atlas — _planned_  (1/7)
 
 The thing people actually open.
 
+- [x] Submission page: the socket manifest rendered as a static input surface, no backend and no build step
 - [ ] Static site, no backend: data ships as JSON beside the page
 - [ ] Force graph, two constellations, correspondence and contradiction edges
 - [ ] Time scrubber: drag a year, watch the corpus and the gap move

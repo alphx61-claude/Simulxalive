@@ -39,6 +39,7 @@ These are not style preferences. Breaking them makes the project worthless.
 | `tools/sockets/` | one socket per way a paper can arrive; `submit()` is the layer |
 | `tools/ingest.py` | submit a source, review the queue, accept into the bibliography |
 | `tools/validate.py` | referential integrity across axes, protocols, sources, inbox |
+| `site/submit.html` | the submission GUI — **generated** by `tools/gen_site.py` |
 | `tools/gen_artboards.py` | redraws the design plates from `data/` |
 | `tools/gen_roadmap.py` | renders `ROADMAP.md` and the tracking page |
 | `*.dc.html`, `canvas.json` | design canvas artboards |
@@ -54,6 +55,10 @@ These are not style preferences. Breaking them makes the project worthless.
   rather than by hand-editing `data/sources.json`. Submissions stage in `data/inbox.json`
   and only a person moves them across (`ingest.py accept`), which records provenance and
   refuses an entry missing a field. `docs/SOCKETS.md` is the contract.
+- `site/submit.html` is generated from the socket registry, like `ROADMAP.md` and the
+  plates. Touch a socket or the taxonomy, re-run `python3 tools/gen_site.py`, commit the
+  output. Never hand-edit it — the form's inputs, routing patterns and axis list all come
+  from `tools/sockets` and `data/` at build time, which is what keeps them in step.
 - Validate before committing anything under `data/`: `python3 tools/validate.py` checks
   referential integrity between `axes`, `protocols`, `sources` and the inbox. After
   touching a socket, `python3 tools/test_sockets.py`.
@@ -65,6 +70,6 @@ These are not style preferences. Breaking them makes the project worthless.
 
 Phase 0 complete: taxonomy, seed bibliography, paired protocols, design system and a
 six-plate layout. Phase 1 (papers as graph nodes) is next. The input-socket layer landed
-early out of Phase 2, because the ingestion seam had to exist before the corpus grows;
-it has no UI and makes no network calls. There is still no application code — deliberate,
-not an oversight.
+early out of Phase 2, because the ingestion seam had to exist before the corpus grows, and
+`site/submit.html` is its GUI — one static page, no backend, no network. The atlas itself
+is still unbuilt, which is deliberate, not an oversight.
