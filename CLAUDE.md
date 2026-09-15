@@ -31,22 +31,43 @@ These are not style preferences. Breaking them makes the project worthless.
 | `data/axes.json` | 28 constructs, the rubric, convergence/robustness scores |
 | `data/protocols.json` | paired runs where humans and models both report a number |
 | `data/sources.json` | bibliography, referenced by id from the other two |
+| `data/inbox.json` | submissions staged by a socket, waiting on a person |
 | `docs/roadmap.json` | phases and milestones — **the state of the project** |
 | `docs/DATA-MODEL.md` | v2 schema: papers and clusters as nodes |
 | `docs/DESIGN.md` | the visual system |
+| `docs/SOCKETS.md` | the input-socket contract and submission envelope |
+| `tools/sockets/` | one socket per way a paper can arrive; `submit()` is the layer |
+| `tools/ingest.py` | submit a source, review the queue, accept into the bibliography |
+| `tools/validate.py` | referential integrity across axes, protocols, sources, inbox |
+| `site/submit.html` | the submission GUI — **generated** by `tools/gen_site.py` |
+| `tools/templates/` | Jinja templates for the generated pages |
+| `requirements.txt` | dev tooling only — nothing here ships with the atlas |
 | `tools/gen_artboards.py` | redraws the design plates from `data/` |
 | `tools/gen_roadmap.py` | renders `ROADMAP.md` and the tracking page |
 | `*.dc.html`, `canvas.json` | design canvas artboards |
 
 ## Working conventions
 
+- `python3 -m pip install -r requirements.txt` before running the tools: Jinja2 for the
+  page generators, click for the CLI, pytest for the self-test. The atlas itself has no
+  runtime dependency — `site/submit.html` is a committed static file and `data/` is plain
+  JSON — so these are for regenerating and checking the repository, nothing else.
 - Plate geometry is **computed from `data/`**. Change a score, re-run
   `python3 tools/gen_artboards.py`, and the plates redraw. Never hand-edit a generated
   artboard except `Main.dc.html`, which is authored.
 - The seeded canvas (`simulxalive-atlas.html`, ~2.5 MB) is gitignored and rebuilt by
   `tools/seed.sh`.
-- Validate data before committing: referential integrity between `axes`, `protocols`
-  and `sources` is checked by the validator once Phase 1 lands.
+- New sources enter through a socket — `python3 tools/ingest.py submit "<reference>"` —
+  rather than by hand-editing `data/sources.json`. Submissions stage in `data/inbox.json`
+  and only a person moves them across (`ingest.py accept`), which records provenance and
+  refuses an entry missing a field. `docs/SOCKETS.md` is the contract.
+- `site/submit.html` is generated from the socket registry, like `ROADMAP.md` and the
+  plates. Touch a socket or the taxonomy, re-run `python3 tools/gen_site.py`, commit the
+  output. Never hand-edit it — the form's inputs, routing patterns and axis list all come
+  from `tools/sockets` and `data/` at build time, which is what keeps them in step.
+- Validate before committing anything under `data/`: `python3 tools/validate.py` checks
+  referential integrity between `axes`, `protocols`, `sources` and the inbox. After
+  touching a socket, `python3 tools/test_sockets.py`.
 - Research lookups: the Consensus MCP server returns real papers with resolvable URLs.
   Prefer it over recalling citations from memory — memory produces plausible-looking
   fabrications here.
@@ -54,5 +75,7 @@ These are not style preferences. Breaking them makes the project worthless.
 ## Status
 
 Phase 0 complete: taxonomy, seed bibliography, paired protocols, design system and a
-six-plate layout. Phase 1 (papers as graph nodes) is next. No application code exists
-yet — this is deliberate, not an oversight.
+six-plate layout. Phase 1 (papers as graph nodes) is next. The input-socket layer landed
+early out of Phase 2, because the ingestion seam had to exist before the corpus grows, and
+`site/submit.html` is its GUI — one static page, no backend, no network. The atlas itself
+is still unbuilt, which is deliberate, not an oversight.

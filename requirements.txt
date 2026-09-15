@@ -1,0 +1,10 @@
+# Development tooling only. Nothing here ships with the atlas: site/submit.html
+# is a committed static file with no build step, no bundler and no runtime
+# dependency, and data/ is plain JSON. These are what regenerates and checks the
+# repository.
+#
+#   python3 -m pip install -r requirements.txt
+
+Jinja2>=3.1        # tools/gen_site.py, tools/gen_roadmap.py - the page templates
+click>=8.1         # tools/ingest.py - the submit and review CLI
+pytest>=8.0        # tools/test_sockets.py - the socket layer's self-test

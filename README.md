@@ -38,6 +38,7 @@ in `data/sources.json`.
 | `data/axes.json` | The 28 paired constructs, scores, rubric, family grouping |
 | `data/protocols.json` | 7 protocols where humans **and** models both report a number on one scale |
 | `data/sources.json` | 61 papers, cited by id from the other two files |
+| `data/inbox.json` | Submitted papers waiting on review — not yet part of the corpus |
 
 ### On the scores
 
@@ -49,6 +50,41 @@ independent labs (`strong`), replicated with material caveats (`mixed`), or dire
 disputed (`contested`); it weights every aggregate above.
 
 Figures quoted inside `finding` and `note` fields **are** from the papers.
+
+## Running the tools
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Jinja2, click and pytest — for the generators, the CLI and the self-test. The atlas
+itself ships with no dependency at all: `site/submit.html` is a committed static file
+and the data is plain JSON.
+
+## Adding a source
+
+Papers arrive through **input sockets** — one contract covering a DOI, an arXiv id, an
+OpenAlex id, a Consensus link, a bare URL or a typed citation:
+
+```bash
+python3 tools/ingest.py sockets                 # what inputs exist
+python3 tools/ingest.py submit "10.1073/pnas.2405460121" --axis prompt-invariance \
+    --set title="..." --set authors="..." --set year=2024 --set venue="PNAS Nexus"
+python3 tools/ingest.py queue                   # what is waiting on a person
+python3 tools/ingest.py accept <key> --by <you> # the only path into sources.json
+python3 tools/validate.py                       # referential integrity
+```
+
+There is a GUI for the same thing — `site/submit.html`, a single generated page with no
+backend. It routes a pasted reference, tags it against the taxonomy and emits the
+submission envelope; you replay that envelope through the command above. Rebuild it with
+`python3 tools/gen_site.py` after touching a socket.
+
+A submission stages in `data/inbox.json` and goes nowhere until someone accepts it.
+Nothing fills in metadata on your behalf: a draft missing its title, authors, year,
+venue or URL is refused at the gate rather than completed by guesswork. Each socket
+declares its own fields and detection patterns, so the site's input sockets will render
+from the same manifest the CLI prints — see `docs/SOCKETS.md`.
 
 ## Design canvas
 
@@ -67,4 +103,5 @@ Visual system: **Dala** — see `docs/DESIGN.md`.
 
 ## Status
 
-Design canvas only. The interactive build is not started.
+Design canvas, the input-socket layer that sources arrive through, and its submission
+page. The atlas itself is not started; see `ROADMAP.md`.
