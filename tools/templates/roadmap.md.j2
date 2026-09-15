@@ -1,0 +1,28 @@
+# {{ project }} — roadmap
+
+<!-- Generated from docs/roadmap.json by tools/gen_roadmap.py. Do not edit. -->
+
+{{ premise }}
+
+**{{ done }} of {{ total }} milestones complete.**
+
+## Decisions taken
+
+{% for d in decisions %}- **{{ d.q }}** — {{ d.a }}
+{% endfor %}
+## Phases
+
+{% for p in phases %}### {{ p.id }}. {{ p.name }} — _{{ p.status }}_  ({{ p.done }}/{{ p.total }})
+
+{{ p.goal }}
+
+{% for m in p.milestones %}- [{{ 'x' if m.done else ' ' }}] {{ m.t }}
+{% endfor %}{% if p.exit %}
+**Done when:** {{ p.exit }}
+{% endif %}
+{% endfor %}## Invariants
+
+Breaking these makes the project worthless, not merely untidy.
+
+{% for inv in invariants %}{{ loop.index }}. {{ inv }}
+{% endfor %}

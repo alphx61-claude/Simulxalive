@@ -51,6 +51,16 @@ disputed (`contested`); it weights every aggregate above.
 
 Figures quoted inside `finding` and `note` fields **are** from the papers.
 
+## Running the tools
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Jinja2, click and pytest — for the generators, the CLI and the self-test. The atlas
+itself ships with no dependency at all: `site/submit.html` is a committed static file
+and the data is plain JSON.
+
 ## Adding a source
 
 Papers arrive through **input sockets** — one contract covering a DOI, an arXiv id, an

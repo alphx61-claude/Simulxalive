@@ -11,7 +11,7 @@ import re
 from datetime import date
 from typing import Any, Dict, List, Optional, Tuple
 
-from .core import SocketError
+from .core import CITATION_FIELDS, SocketError
 from . import identifiers
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -81,25 +81,23 @@ def source_keys() -> Dict[str, str]:
     return index
 
 
+def collision_keys(record: Dict[str, Any]) -> set:
+    """Every key a paper record could already be known by."""
+    keys = {record["key"]} | {f"{k}:{v}" for k, v in (record.get("ident") or {}).items()}
+    if record.get("title"):
+        keys.add(f"title:{identifiers.normalise_title(record['title'])}")
+    return keys
+
+
 def duplicate_of(draft) -> Optional[Tuple[str, str]]:
     """(where, id) if this paper is already known, else None."""
-    candidates = {draft.key}
-    for kind, value in draft.ident.items():
-        candidates.add(f"{kind}:{value}")
-    if draft.title:
-        candidates.add(f"title:{identifiers.normalise_title(draft.title)}")
-
+    candidates = collision_keys(draft.as_dict())
     index = source_keys()
     for c in candidates:
         if c in index:
             return "sources", index[c]
     for row in submissions():
-        if row.get("status") == "rejected":
-            continue
-        known = {row["key"]} | {f"{k}:{v}" for k, v in row.get("ident", {}).items()}
-        if row.get("title"):
-            known.add(f"title:{identifiers.normalise_title(row['title'])}")
-        if candidates & known:
+        if row.get("status") != "rejected" and candidates & collision_keys(row):
             return "inbox", row["key"]
     return None
 
@@ -119,16 +117,21 @@ def slug(authors: str, year: int, taken) -> str:
 
 
 # --------------------------------------------------------------- review gate
-def accept(key: str, by: str, source_id: Optional[str] = None) -> Dict[str, Any]:
-    """Move a pending draft into data/sources.json. Refuses an incomplete one."""
+def pending(key: str) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """The inbox and the one pending row with this key, or a refusal."""
     inbox = load_inbox()
     row = next((r for r in inbox["submissions"] if r["key"] == key), None)
     if row is None:
         raise SocketError("not_found", f"No submission with key '{key}'.")
     if row["status"] != "pending":
         raise SocketError("not_pending", f"'{key}' is already {row['status']}.")
+    return inbox, row
 
-    missing = [f for f in ("title", "authors", "year", "venue", "url") if not row.get(f)]
+
+def accept(key: str, by: str, source_id: Optional[str] = None) -> Dict[str, Any]:
+    """Move a pending draft into data/sources.json. Refuses an incomplete one."""
+    inbox, row = pending(key)
+    missing = [f for f in CITATION_FIELDS if not row.get(f)]
     if missing:
         raise SocketError(
             "incomplete",
@@ -142,8 +145,7 @@ def accept(key: str, by: str, source_id: Optional[str] = None) -> Dict[str, Any]
     if sid in sources:
         raise SocketError("id_taken", f"Source id '{sid}' already exists.")
 
-    entry = {"authors": row["authors"], "year": row["year"], "title": row["title"],
-             "venue": row["venue"], "url": row["url"]}
+    entry = {f: row[f] for f in ("authors", "year", "title", "venue", "url")}
     # Forward-compatible with the v2 paper record (docs/DATA-MODEL.md); the 61
     # seed entries do not carry these yet and are left untouched.
     if row.get("domain"):
@@ -165,12 +167,7 @@ def accept(key: str, by: str, source_id: Optional[str] = None) -> Dict[str, Any]
 
 
 def reject(key: str, reason: str, by: str = "") -> Dict[str, Any]:
-    inbox = load_inbox()
-    row = next((r for r in inbox["submissions"] if r["key"] == key), None)
-    if row is None:
-        raise SocketError("not_found", f"No submission with key '{key}'.")
-    if row["status"] != "pending":
-        raise SocketError("not_pending", f"'{key}' is already {row['status']}.")
+    inbox, row = pending(key)
     row.update(status="rejected", reason=reason, rejected_by=by,
                rejected=date.today().isoformat())
     save_inbox(inbox)

@@ -76,8 +76,8 @@ inlines the manifest, the extraction patterns and the 28 axis ids into the page,
 form cannot drift from the layer behind it. Edit a socket, re-run the generator, commit
 the result; never hand-edit the output.
 
-It is a single file with no build step, no framework and no fetch, so it opens straight
-from disk:
+The page itself is a single file with no build step, no framework and no fetch, so it
+opens straight from disk — the template and Jinja are build-time only:
 
 ```bash
 python3 tools/gen_site.py          # after touching a socket or the taxonomy
@@ -163,6 +163,7 @@ entry in `sniff()` and `key_for()` — that is the whole list. Then run
 ## Commands
 
 ```bash
+python3 -m pip install -r requirements.txt      # Jinja2, click, pytest
 python3 tools/gen_site.py                       # rebuild site/submit.html
 python3 tools/ingest.py sockets                 # what inputs exist
 python3 tools/ingest.py submit "<reference>" --axis <id> --domain <d> --by <you>

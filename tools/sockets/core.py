@@ -14,7 +14,7 @@ Two rules this module exists to enforce:
     anything missing cannot be accepted into the bibliography.
 """
 import re
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 # A bibliography entry is only citable when all five are known. Mirrors the
@@ -47,15 +47,12 @@ class Field:
     help: str = ""
     options: Tuple[str, ...] = ()
 
+    STRUCTURAL = ("name", "label", "kind", "required")
+
     def as_dict(self):
-        d = {"name": self.name, "label": self.label, "kind": self.kind,
-             "required": self.required}
-        for k in ("placeholder", "help"):
-            if getattr(self, k):
-                d[k] = getattr(self, k)
-        if self.options:
-            d["options"] = list(self.options)
-        return d
+        """The four structural keys always; placeholder, help and options only when set."""
+        d = {**asdict(self), "options": list(self.options)}
+        return {k: v for k, v in d.items() if k in self.STRUCTURAL or v}
 
 
 # Asked on every socket: what the paper bears on, and who is vouching for it.
@@ -97,10 +94,7 @@ class Draft:
         return not self.missing
 
     def as_dict(self):
-        d = {"key": self.key, "socket": self.socket, "ident": dict(self.ident)}
-        d.update({f: getattr(self, f) for f in CITATION_FIELDS})
-        d.update({"axes": list(self.axes), "domain": self.domain, "note": self.note})
-        return d
+        return asdict(self)      # field order is the record order; see the class body
 
 
 # -------------------------------------------------------------------- socket

@@ -40,12 +40,18 @@ These are not style preferences. Breaking them makes the project worthless.
 | `tools/ingest.py` | submit a source, review the queue, accept into the bibliography |
 | `tools/validate.py` | referential integrity across axes, protocols, sources, inbox |
 | `site/submit.html` | the submission GUI — **generated** by `tools/gen_site.py` |
+| `tools/templates/` | Jinja templates for the generated pages |
+| `requirements.txt` | dev tooling only — nothing here ships with the atlas |
 | `tools/gen_artboards.py` | redraws the design plates from `data/` |
 | `tools/gen_roadmap.py` | renders `ROADMAP.md` and the tracking page |
 | `*.dc.html`, `canvas.json` | design canvas artboards |
 
 ## Working conventions
 
+- `python3 -m pip install -r requirements.txt` before running the tools: Jinja2 for the
+  page generators, click for the CLI, pytest for the self-test. The atlas itself has no
+  runtime dependency — `site/submit.html` is a committed static file and `data/` is plain
+  JSON — so these are for regenerating and checking the repository, nothing else.
 - Plate geometry is **computed from `data/`**. Change a score, re-run
   `python3 tools/gen_artboards.py`, and the plates redraw. Never hand-edit a generated
   artboard except `Main.dc.html`, which is authored.

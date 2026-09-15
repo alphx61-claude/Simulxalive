@@ -8,14 +8,15 @@
     tools/ingest.py accept doi:10.1073/pnas.2405460121 --by taran
     tools/ingest.py reject arxiv:2303.11436 --reason "superseded by the journal version"
 
-The same envelope this CLI builds is what the site's input sockets will post -
-see docs/SOCKETS.md. `submit --json -` reads that envelope from stdin, so the
-web path and this path exercise identical code.
+The same envelope this CLI builds is what site/submit.html emits - see
+docs/SOCKETS.md. `submit --json -` reads that envelope from stdin, so the web
+path and this path exercise identical code.
 """
-import argparse
 import json
 import pathlib
 import sys
+
+import click
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
@@ -25,160 +26,132 @@ from sockets import SocketError, store                            # noqa: E402
 BULLET = "  - "
 
 
-def out(obj, as_json):
-    if as_json:
-        print(json.dumps(obj, indent=2, ensure_ascii=False))
-    return obj
+def emit(obj):
+    click.echo(json.dumps(obj, indent=2, ensure_ascii=False))
 
 
-# ------------------------------------------------------------------- sockets
-def cmd_sockets(a):
+class Layer(click.Group):
+    """A refusal from the layer is a message and exit 1, not a traceback."""
+
+    def invoke(self, ctx):
+        try:
+            return super().invoke(ctx)
+        except SocketError as e:
+            click.echo(f"refused [{e.code}]: {e.message}", err=True)
+            for k, v in e.extra.items():
+                click.echo(f"{BULLET}{k}: {v}", err=True)
+            ctx.exit(1)
+
+
+@click.group(cls=Layer, help=__doc__.split("\n")[0],
+             context_settings={"help_option_names": ["-h", "--help"]})
+def cli():
+    pass
+
+
+@cli.command("sockets", help="list the available inputs")
+@click.option("--json", "as_json", is_flag=True, help="emit the full manifest")
+@click.option("--out", type=click.Path(), help="write the manifest to a file for the site to ship")
+def list_sockets(as_json, out):
     manifest = sockets.manifest()
-    if a.out:
-        pathlib.Path(a.out).write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
-        print(f"wrote {a.out}")
-        return 0
-    if a.json:
-        return out(manifest, True) and 0
+    if out:
+        pathlib.Path(out).write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+        return click.echo(f"wrote {out}")
+    if as_json:
+        return emit(manifest)
     for s in manifest["sockets"]:
-        req = [f["name"] for f in s["fields"] if f["required"]]
-        print(f"{s['name']:<10} {s['label']}")
-        print(f"{BULLET}{s['help']}")
-        print(f"{BULLET}required: {', '.join(req) or 'none'}")
-        print(f"{BULLET}e.g. {s['example']}")
-    print(f"\nasked on every socket: {', '.join(f['name'] for f in manifest['common'])}")
-    return 0
+        required = [f["name"] for f in s["fields"] if f["required"]]
+        click.echo(f"{s['name']:<10} {s['label']}")
+        click.echo(f"{BULLET}{s['help']}")
+        click.echo(f"{BULLET}required: {', '.join(required) or 'none'}")
+        click.echo(f"{BULLET}e.g. {s['example']}")
+    click.echo(f"\nasked on every socket: {', '.join(f['name'] for f in manifest['common'])}")
 
 
-# -------------------------------------------------------------------- submit
-def cmd_submit(a):
-    if a.json:
-        text = sys.stdin.read() if a.json == "-" else a.json
-        payload = json.loads(text)
+@cli.command(help="stage a paper source for review")
+@click.argument("raw", required=False)
+@click.option("--socket", help="force a socket instead of auto-routing")
+@click.option("--set", "fields", multiple=True, metavar="KEY=VALUE",
+              help="a socket field, repeatable")
+@click.option("--axis", "axes", multiple=True, help="axis id, repeatable")
+@click.option("--domain", help="human | machine | bridge")
+@click.option("--note", default="")
+@click.option("--by", default="", help="who is submitting")
+@click.option("--json", "envelope", help="a whole submission envelope, or - for stdin")
+@click.option("--allow-duplicate", is_flag=True)
+@click.option("--as-json", is_flag=True, help="print the result as JSON")
+def submit(raw, socket, fields, axes, domain, note, by, envelope, allow_duplicate, as_json):
+    if envelope:
+        payload = json.loads(sys.stdin.read() if envelope == "-" else envelope)
     else:
-        values = {}
-        for pair in a.set:
-            if "=" not in pair:
-                print(f"--set expects key=value, got {pair!r}", file=sys.stderr)
-                return 2
-            k, v = pair.split("=", 1)
-            values[k.strip()] = v
-        if a.raw:
-            values["raw"] = a.raw
-        payload = {"socket": a.socket, "values": values, "axes": a.axis,
-                   "domain": a.domain, "note": a.note, "submitted_by": a.by}
+        if any("=" not in pair for pair in fields):
+            raise click.BadParameter("expected KEY=VALUE", param_hint="--set")
+        values = {k.strip(): v for k, v in (p.split("=", 1) for p in fields)}
+        if raw:
+            values["raw"] = raw
+        payload = {"socket": socket, "values": values, "axes": list(axes),
+                   "domain": domain, "note": note, "submitted_by": by}
 
-    result = sockets.submit(payload, allow_duplicate=a.allow_duplicate)
-    if a.as_json:
-        return out(result, True) and 0
-    d = result["draft"]
-    print(f"staged {result['key']}  (socket: {result['socket']})")
-    print(f"{BULLET}" + (d["title"] or "title unknown"))
+    result = sockets.submit(payload, allow_duplicate=allow_duplicate)
+    if as_json:
+        return emit(result)
+    click.echo(f"staged {result['key']}  (socket: {result['socket']})")
+    click.echo(BULLET + (result["draft"]["title"] or "title unknown"))
     for w in result["warnings"]:
-        print(f"{BULLET}{w}")
-    print(f"\nreview with: tools/ingest.py accept {result['key']} --by <you>")
-    return 0
+        click.echo(f"{BULLET}{w}")
+    click.echo(f"\nreview with: tools/ingest.py accept {result['key']} --by <you>")
 
 
-# --------------------------------------------------------------------- queue
-def cmd_queue(a):
-    rows = sockets.queue(None if a.all else "pending")
-    if a.as_json:
-        return out(rows, True) and 0
+@cli.command(help="what is waiting on review")
+@click.option("--all", "everything", is_flag=True, help="include accepted and rejected")
+@click.option("--as-json", is_flag=True)
+def queue(everything, as_json):
+    rows = sockets.queue(None if everything else "pending")
+    if as_json:
+        return emit(rows)
     if not rows:
-        print("inbox empty")
-        return 0
+        return click.echo("inbox empty")
     for r in rows:
-        flag = "" if not r.get("warnings") else f"  ({len(r['warnings'])} warning(s))"
-        print(f"[{r['status']:<8}] {r['key']}{flag}")
-        print(f"{BULLET}{r.get('title') or 'title unknown'}"
-              f"{'  ' + str(r['year']) if r.get('year') else ''}")
+        warnings = f"  ({len(r['warnings'])} warning(s))" if r.get("warnings") else ""
+        year = f"  {r['year']}" if r.get("year") else ""
+        click.echo(f"[{r['status']:<8}] {r['key']}{warnings}")
+        click.echo(f"{BULLET}{r.get('title') or 'title unknown'}{year}")
         if r.get("axes"):
-            print(f"{BULLET}axes: {', '.join(r['axes'])}")
+            click.echo(f"{BULLET}axes: {', '.join(r['axes'])}")
         if r.get("source_id"):
-            print(f"{BULLET}accepted as {r['source_id']}")
-    return 0
+            click.echo(f"{BULLET}accepted as {r['source_id']}")
 
 
-def cmd_show(a):
-    row = store.find(a.key)
+@cli.command(help="print one submission")
+@click.argument("key")
+def show(key):
+    row = store.find(key)
     if row is None:
-        print(f"no submission with key '{a.key}'", file=sys.stderr)
-        return 1
-    return out(row, True) and 0
+        raise SocketError("not_found", f"No submission with key '{key}'.")
+    emit(row)
 
 
-# -------------------------------------------------------------- review gate
-def cmd_accept(a):
-    result = sockets.accept(a.key, by=a.by, source_id=a.id)
-    if a.as_json:
-        return out(result, True) and 0
-    print(f"accepted {a.key} into data/sources.json as {result['source_id']}")
-    print(f"{BULLET}run tools/validate.py before committing")
-    return 0
+@cli.command(help="move a draft into the bibliography")
+@click.argument("key")
+@click.option("--by", required=True, help="who is vouching for it")
+@click.option("--id", "source_id", help="override the generated source id")
+@click.option("--as-json", is_flag=True)
+def accept(key, by, source_id, as_json):
+    result = sockets.accept(key, by=by, source_id=source_id)
+    if as_json:
+        return emit(result)
+    click.echo(f"accepted {key} into data/sources.json as {result['source_id']}")
+    click.echo(f"{BULLET}run tools/validate.py before committing")
 
 
-def cmd_reject(a):
-    sockets.reject(a.key, reason=a.reason, by=a.by)
-    print(f"rejected {a.key}: {a.reason}")
-    return 0
-
-
-# ----------------------------------------------------------------------- cli
-def main(argv=None):
-    p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    sub = p.add_subparsers(dest="cmd", required=True)
-
-    s = sub.add_parser("sockets", help="list the available inputs")
-    s.add_argument("--json", action="store_true", help="emit the full manifest")
-    s.add_argument("--out", help="write the manifest to a file for the site to ship")
-    s.set_defaults(fn=cmd_sockets)
-
-    s = sub.add_parser("submit", help="stage a paper source for review")
-    s.add_argument("raw", nargs="?", help="the reference, pasted whole")
-    s.add_argument("--socket", help="force a socket instead of auto-routing")
-    s.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
-                   help="a socket field, repeatable")
-    s.add_argument("--axis", action="append", default=[], help="axis id, repeatable")
-    s.add_argument("--domain", help="human | machine | bridge")
-    s.add_argument("--note", default="")
-    s.add_argument("--by", default="", help="who is submitting")
-    s.add_argument("--json", help="a whole submission envelope, or - for stdin")
-    s.add_argument("--allow-duplicate", action="store_true")
-    s.add_argument("--as-json", action="store_true", help="print the result as JSON")
-    s.set_defaults(fn=cmd_submit)
-
-    s = sub.add_parser("queue", help="what is waiting on review")
-    s.add_argument("--all", action="store_true", help="include accepted and rejected")
-    s.add_argument("--as-json", action="store_true")
-    s.set_defaults(fn=cmd_queue)
-
-    s = sub.add_parser("show", help="print one submission")
-    s.add_argument("key")
-    s.set_defaults(fn=cmd_show)
-
-    s = sub.add_parser("accept", help="move a draft into the bibliography")
-    s.add_argument("key")
-    s.add_argument("--by", required=True, help="who is vouching for it")
-    s.add_argument("--id", help="override the generated source id")
-    s.add_argument("--as-json", action="store_true")
-    s.set_defaults(fn=cmd_accept)
-
-    s = sub.add_parser("reject", help="close a draft without adding it")
-    s.add_argument("key")
-    s.add_argument("--reason", required=True)
-    s.add_argument("--by", default="")
-    s.set_defaults(fn=cmd_reject)
-
-    a = p.parse_args(argv)
-    try:
-        return a.fn(a) or 0
-    except SocketError as e:
-        print(f"refused [{e.code}]: {e.message}", file=sys.stderr)
-        for k, v in e.extra.items():
-            print(f"{BULLET}{k}: {v}", file=sys.stderr)
-        return 1
+@cli.command(help="close a draft without adding it")
+@click.argument("key")
+@click.option("--reason", required=True)
+@click.option("--by", default="")
+def reject(key, reason, by):
+    sockets.reject(key, reason=reason, by=by)
+    click.echo(f"rejected {key}: {reason}")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    cli()
